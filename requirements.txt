@@ -1,0 +1,12 @@
+pandas==2.3.3
+numpy>=2.1.0
+scipy>=1.14.1
+scikit-learn==1.6.1
+requests>=2.32.0
+matplotlib
+seaborn
+streamlit
+polars
+modin[dask]
+dotenv
+aiohttp
