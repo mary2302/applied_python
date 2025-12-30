@@ -12,8 +12,7 @@ from parallel_EDA import default_pd
 
 load_dotenv()
 key = os.getenv("API_KEY")
-path = os.getenv("DATA_PATH")
-df = pd.read_csv(path)
+df = pd.read_csv("temperature_data.csv")
 
 history_data = default_pd(df)
 

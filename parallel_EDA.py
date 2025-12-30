@@ -6,13 +6,8 @@ from multiprocessing import Pool, cpu_count
 import modin.pandas as mpd
 import polars as pl
 import time
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
-path = os.getenv("DATA_PATH")
-df = pd.read_csv(path)
-df_modin = mpd.read_csv(path)
+df = pd.read_csv("temperature_data.csv")
 
 #Соберем обычный подход в функцию, чтобы удобнее было замерять время работы
 
@@ -61,6 +56,7 @@ def multiprocessing_pd(df, nprocs):
 
 #Параллельный анализ с помощью modin на движке Ray
 def modin_pd(df):
+    df = mpd.DataFrame(df.copy())
     df["timestamp"] = mpd.to_datetime(df["timestamp"], errors="coerce")
     df = df.sort_values(["city", "timestamp"]).reset_index(drop=True)
 
@@ -81,12 +77,13 @@ def polars_pd(path) -> pl.DataFrame:
     df = df.sort(["city", "timestamp"])
     
     #Скользящее среднее ma30 по каждому городу
-    df = df.with_columns(pl.col("temperature").rolling_mean(window_size=30, min_periods=1).over("city").alias("ma30"))
+    df = df.with_columns(pl.col("temperature").rolling_mean(window_size=30, min_samples=1).over("city").alias("ma30"))
 
     stats = (
         df.group_by(["city", "season"])
           .agg([
               pl.col("temperature").mean().alias("season_mean"),
+              pl.col("temperature").std().alias("season_std"),
               pl.len().alias("n")
           ])
     )
@@ -121,13 +118,13 @@ def benchmark(func, label, repeats=5):
 
 def main():
 
-    benchmark(lambda: default_pd(path), "default pandas", repeats=5)
+    benchmark(lambda: default_pd(df), "default pandas", repeats=5)
 
     benchmark(lambda: multiprocessing_pd(df, nprocs=4), "pandas multiprocessing", repeats=5)
 
-    benchmark(lambda: modin_pd(df_modin), "modin", repeats=5)
+    benchmark(lambda: modin_pd(df), "modin", repeats=5)
 
-    benchmark(lambda: polars_pd(path), "polars", repeats=5)
+    benchmark(lambda: polars_pd("temperature_data.csv"), "polars", repeats=5)
 
 if __name__ == "__main__":
     main()
