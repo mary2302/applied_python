@@ -158,7 +158,7 @@ df_city = history_data[history_data["city"] == city].copy()
 anom = df_city[df_city.get("is_anomaly", False) == True].copy()
 
 st.subheader("Описательная статистика для исторических данных")
-st.dataframe(city["temperature"].describe())
+st.dataframe(df_city["temperature"].describe())
 
 
 st.subheader("Сезонные профили")
