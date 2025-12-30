@@ -267,7 +267,7 @@ monthly_fig = plot_single_city_monthly(df_city, city)
 if monthly_fig is not None:
     st.plotly_chart(monthly_fig, use_container_width=True)
 
-    st.subheader("Анализ трендов по месяцам"):
+    st.subheader("Анализ трендов по месяцам")
     monthly_data = ma_by_month(df_city)
     if not monthly_data.empty:
         latest = monthly_data.iloc[-1]
