@@ -40,16 +40,15 @@ def current_temp_sync(city):
 def is_normal(city, temp, season):
     #Проверяем текущую температуру на нормальность для сезона
     row = history_data.loc[
-        (history_data["city"] == city) & (history_data["season"] == season),
-        ["season_mean", "season_std"]
+        (history_data["city"] == city) & (history_data["season"] == season)
     ].head(1)
 
     mean = float(row.iloc[0]["season_mean"])
     std = float(row.iloc[0]["season_std"])
 
-    low = mean - 2 * std
-    high = mean + 2 * std
-    is_anom = (temp < low) or (temp > high)
+    lower_bound = float(row.iloc[0]["lower_bound"])
+    upper_bound = float(row.iloc[0]["upper_bound"])
+    is_anom = row.iloc[0]["is_anomaly"]
 
     return {
         "city": city,
@@ -57,12 +56,13 @@ def is_normal(city, temp, season):
         "temp": temp,
         "season_mean": mean,
         "season_std": std,
-        "lower_bound": low,
-        "upper_bound": high,
+        "lower_bound": lower_bound,
+        "upper_bound": upper_bound,
         "is_anomaly": is_anom,
     }
 
 def check_city_sync(city):
+    #Функция для проверки на аномальность погоды в выбранном городе
     season = season_from_month(datetime.utcnow().month)
     temp = current_temp_sync(city)
     return is_normal(city, temp, season)
