@@ -5,7 +5,6 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import aiohttp
 import asyncio
-import time
 
 from weather_req import season_from_month
 from parallel_EDA import default_pd
@@ -151,9 +150,11 @@ else:
             is_anom = (temp_now < low) or (temp_now > high)
 
             st.write(f"**Норма сезона:** mean={mean:.2f}°C, std={std:.2f}°C → диапазон [{low:.2f}, {high:.2f}]")
-            st.error("Текущая температура **аномальная** (вне mean ± 2σ).") if is_anom else st.success(
-                "Текущая температура **нормальная** (в пределах mean ± 2σ)."
-            )
+            if is_anom:
+                st.error("Текущая температура **аномальная** (вне mean ± 2σ).")
+            else:
+                st.success("Текущая температура **нормальная** (в пределах mean ± 2σ).")
+
 
             with st.expander("Сырые данные ответа OpenWeatherMap"):
                 st.code(raw, language="json")
