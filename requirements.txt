@@ -10,3 +10,4 @@ polars
 modin[dask]
 dotenv
 aiohttp
+plotly
