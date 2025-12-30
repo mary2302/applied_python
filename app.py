@@ -157,11 +157,11 @@ city = st.selectbox("Выберите город", cities, index=0)
 df_city = history_data[history_data["city"] == city].copy()
 anom = df_city[df_city.get("is_anomaly", False) == True].copy()
 
-st.subheader("Описательная статистика для исторических данных")
+st.subheader("Описательные статистики для исторических данных о температуре")
 st.dataframe(df_city["temperature"].describe())
 
 
-st.subheader("Сезонные профили")
+st.subheader("Статистика по временам года")
 if df_city.empty:
     st.info("Нет данных по выбранному городу.")
 else:
@@ -255,8 +255,8 @@ else:
         yaxis_title="Temperature (°C)",
         hovermode="x unified",
         template="plotly_white",
-        height=500,
-        showlegend=True
+        height=800,
+        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01)
     )
 
     st.plotly_chart(fig2, use_container_width=True)
@@ -270,13 +270,6 @@ if monthly_fig is not None:
     st.subheader("Анализ трендов по месяцам")
     monthly_data = ma_by_month(df_city)
     if not monthly_data.empty:
-        latest = monthly_data.iloc[-1]
-        st.metric(
-            label="Текущий 12-месячный тренд",
-            value=f"{latest['trend_12m']:.2f}°C",
-            delta=f"Отличие в {(latest['temp_month_mean'] - latest['trend_12m']):.2f}°C от среднемесячного значения"
-        )
-
         c1, c2, c3 = st.columns(3)
         with c1:
             st.metric("Макс. месячная", f"{monthly_data['temp_month_mean'].max():.1f}°C")
@@ -305,7 +298,7 @@ else:
         st.write(f"Текущая температура: {temp} °C")
         st.write(f"Время года (eng): {current_season}")
 
-        row = df_city.loc[df_city["season"] == current_season, ["season_mean", "season_std"]].head(1)
+        row = df_city.loc[df_city["season"] == current_season].head(1)
 
         if row.empty:
             st.warning("Отсутсвуют данные для данного времени года - нельзя сделать вывод об аномальности температуры.")
@@ -315,12 +308,12 @@ else:
 
             lower_bound = float(row.iloc[0]["lower_bound"])
             upper_bound = float(row.iloc[0]["upper_bound"])
-            is_anom = row.iloc[0]["is_anom"]
+            is_anom = row.iloc[0]["is_anomaly"]
 
-            st.write("Норма для данного времени года:")
-            st.write(f"Средняя температура: {mean} °C")
-            st.write(f"Дисперсия температуры: {std} °C")
-            st.write(f"Нормальный температурный интервал (mean±2σ): [{lower_bound}, {upper_bound}]")
+            st.subheader("Норма для данного времени года:")
+            st.write(f"Средняя температура: {mean:.2f} °C")
+            st.write(f"Дисперсия температуры: {std:.2f} °C")
+            st.write(f"Нормальный температурный интервал (mean±2σ): [{lower_bound:.2f}, {upper_bound:.2f}]")
 
             if is_anom:
                 st.error("Текущая температура аномальна!")

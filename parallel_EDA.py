@@ -54,7 +54,7 @@ def multiprocessing_pd(df, nprocs):
 
     return df
 
-#Параллельный анализ с помощью modin на движке Ray
+#Параллельный анализ с помощью modin на движке dask
 def modin_pd(df):
     df = mpd.DataFrame(df.copy())
     df["timestamp"] = mpd.to_datetime(df["timestamp"], errors="coerce")

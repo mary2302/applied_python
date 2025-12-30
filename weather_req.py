@@ -71,11 +71,11 @@ async def current_temp_async(session: aiohttp.ClientSession, city: str) -> float
         #Асинхронно посылаем запросы в API для получения текущей температуры 
         url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}&units=metric"
         async with session.get(url, timeout=aiohttp.ClientTimeout(total=20)) as response:
-            response.raise_for_status()  # выбросит исключение при 4xx/5xx
+            response.raise_for_status()  #обработка исключений
             data = await response.json()
             return float(data["main"]["temp"])
 
-async def check_cities_async(cities: list[str], concurrency: int = 10):
+async def check_cities_async(cities: list[str], concurrency: int):
     season = season_from_month(datetime.utcnow().month)
     #Семафор для ограничения одновременных запросов
     sem = asyncio.Semaphore(concurrency)
