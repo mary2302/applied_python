@@ -71,9 +71,9 @@ def modin_pd(df):
     return df
 
 #Параллельный анализ с помощью polars
-def polars_pd(path) -> pl.DataFrame:
-    #Загружаем через Polars df
-    df = pl.read_csv(path, try_parse_dates=True).with_columns([pl.col("timestamp")])
+def polars_pd(df) -> pl.DataFrame:
+    df = pl.from_pandas(df)
+    df = df.with_columns(pl.col("timestamp").str.to_datetime(strict=False).alias("timestamp"))
     df = df.sort(["city", "timestamp"])
     
     #Скользящее среднее ma30 по каждому городу
@@ -124,7 +124,7 @@ def main():
 
     benchmark(lambda: modin_pd(df), "modin", repeats=5)
 
-    benchmark(lambda: polars_pd("temperature_data.csv"), "polars", repeats=5)
+    benchmark(lambda: polars_pd(df), "polars", repeats=5)
 
 if __name__ == "__main__":
     main()
